@@ -1,5 +1,3 @@
-# phone-tracker
-
 # Phone tracker
 
 [![Test and Validate](https://github.com/jmeiracorbal/phone-tracker/workflows/Test%20and%20Validate/badge.svg)](https://github.com/jmeiracorbal/phone-tracker/actions/workflows/test.yml)
