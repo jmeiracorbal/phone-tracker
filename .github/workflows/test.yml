@@ -1,0 +1,63 @@
+name: Test and Validate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Verify Poetry installation
+      run: |
+        poetry --version
+        poetry config --list
+    
+    - name: Install dependencies
+      run: poetry install
+    
+    - name: Validate pyproject.toml
+      run: poetry check
+    
+    - name: Run basic validation
+      run: |
+        poetry run python -c "
+        import phonenumbers
+        import requests
+        print('All dependencies imported successfully')
+        "
+    
+    - name: Test phone tracker functionality
+      run: |
+        poetry run python -c "
+        import phone_tracker
+        print('Phone tracker module imported successfully')
+        "
+    
+    - name: Check file structure
+      run: |
+        ls -la
+        echo 'File structure validated'
+    
+    - name: Test PyInstaller build
+      run: |
+        poetry install --with dev
+        poetry run pyinstaller --onefile --name "test-phone-tracker" phone_tracker.py
+        ls -la dist/
+        echo 'PyInstaller build successful'

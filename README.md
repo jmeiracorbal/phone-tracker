@@ -1,5 +1,8 @@
+# phone-tracker
+
 # Phone tracker
 
+[![Test and Validate](https://github.com/jmeiracorbal/phone-tracker/workflows/Test%20and%20Validate/badge.svg)](https://github.com/jmeiracorbal/phone-tracker/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://python.org)
 [![Poetry](https://img.shields.io/badge/Poetry-1.0%2B-orange.svg)](https://python-poetry.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
