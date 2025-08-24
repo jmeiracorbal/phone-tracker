@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "phone-tracker"
+version = "0.1.0"
+description = "Phone and IP tracking tool"
+authors = ["jmeiracorbal"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.14"
+phonenumbers = "^8.13.0"
+requests = "^2.31.0"
+
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "^6.15.0"
+auto-py-to-exe = "^2.36.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+build-phone = "scripts.build:build_phone"
+build-all = "scripts.build:build_all"

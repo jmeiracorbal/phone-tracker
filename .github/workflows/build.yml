@@ -1,0 +1,126 @@
+name: Build and make release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      run: pip install poetry
+    
+    - name: Install dependencies
+      run: poetry install
+    
+    - name: Build executable
+      run: poetry run pyinstaller --onefile --name "phone-tracker" phone_tracker.py
+    
+    - name: List files in dist (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: ls -la dist/
+    
+    - name: List files in dist (Windows)
+      if: runner.os == 'Windows'
+      run: dir dist\
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: phone-tracker-${{ matrix.os }}
+        path: dist/
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+    
+    - name: List downloaded artifacts
+      run: |
+        find artifacts/ -type f
+        ls -la artifacts/
+        ls -la artifacts/phone-tracker-ubuntu-latest/
+        ls -la artifacts/phone-tracker-macos-latest/
+        ls -la artifacts/phone-tracker-windows-latest/
+    
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: |
+          ## Phone tracker ${{ github.ref_name }}
+          
+          ### Downloads
+          
+          **Linux**: `phone-tracker` - Compatible with most distributions
+          **macOS**: `phone-tracker` - Native for Apple Silicon/Intel
+          **Windows**: `phone-tracker.exe` - Windows 10/11 compatible
+          
+          ### Installation
+          Download the executable for your platform and run it directly. No Python installation required.
+          
+          ### Usage
+          
+          Linux/macOS: 
+          ```bash
+          ./phone-tracker
+          ```
+          
+          Windows:
+          
+          ```bash
+          phone-tracker.exe
+          ```
+        draft: false
+        prerelease: false
+    
+    - name: Upload Linux asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/phone-tracker-ubuntu-latest/phone-tracker
+        asset_name: phone-tracker-linux
+        asset_content_type: application/octet-stream
+    
+    - name: Upload macOS asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/phone-tracker-macos-latest/phone-tracker
+        asset_name: phone-tracker-macos
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Windows asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/phone-tracker-windows-latest/phone-tracker.exe
+        asset_name: phone-tracker-windows.exe
+        asset_content_type: application/octet-stream
